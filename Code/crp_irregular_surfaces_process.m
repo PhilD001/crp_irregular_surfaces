@@ -58,6 +58,8 @@ for g = 1:length(group)
             LeftAKStanceCRP_stk = ones(length(fl), 101);     
             LeftAKSwingCRP_stk = ones(length(fl), 101);       
             
+            vel_stk = ones(length(fl), 1);     
+
             % loop through all trials for a given group/surface/participant ------------------------
             for f = 1:length(fl)
                 [file_pth, file_name, ext] = fileparts(fl{f});
@@ -67,7 +69,7 @@ for g = 1:length(group)
                 
                 % Checks which limb side is associated with the middle step (apex) -----------------
                 ApexFoot=data.zoosystem.CompInfo.ApexFoot;
-
+                                
                 % Extracts Stance and Swing phase indices based on existing gait events ------------
                 FSapex = data.SACR.event.FSapex(1);      % middle portion
                 FSminus1 = data.SACR.event.FSminus1(1);  % step before apex
@@ -80,6 +82,13 @@ for g = 1:length(group)
                     Stance = FSapex(1):FSplus1(1);
                     Swing = FSminus1(1):FSapex(1);
                 end
+                
+                % extract SACR position and compute speed ------------------------------------------
+                SACR = data.SACR.line(FSminus1:FSplus1, :);  
+                SACR_mag = sqrt(SACR(:,1).* SACR(:,1) + SACR(:,2).* SACR(:,2) + SACR(:,3).* SACR(:,3));
+                SACR_mag = SACR_mag/1000;                             % convert to meters
+                time = length(SACR_mag)/data.zoosystem.Video.Freq;    % get time from frequecy
+                vel_stk(f) = abs((SACR_mag(end)-SACR_mag(1))/time);   % velocity in m/s
                 
                 for l = 1:length(limb)
                     
@@ -155,7 +164,10 @@ for g = 1:length(group)
             LeftKHSwing_DP  = std(LeftKHSwingCRP_stk);
             LeftAKStance_DP = std(LeftAKStanceCRP_stk);
             LeftAKSwing_DP  = std(LeftAKSwingCRP_stk);
-
+            
+            % compute mean velocity
+            vel_mean = mean(vel_stk);
+            
             % create new zoo file for ensembled (mean, std) data -----------------------------------
             fl_ens = [file_pth, filesep, file_name(1:end-2), 'ens', ext];
             data_ens = struct;
@@ -202,6 +214,9 @@ for g = 1:length(group)
                 data_ens.(ch{c}).event = events;
             end
             
+            % add velocity as event to last channel (arbitrary)
+            data_ens.RightKHStance_MARP.event.velocity = [1, vel_mean, 0];
+            
             data_ens.zoosystem = setZoosystem(fl_ens);
             zsave(fl_ens, data_ens);
             
@@ -216,7 +231,7 @@ subjects = {'OA03','OA06','OA08','OA10','OA11','OA12','OA14','OA15','OA17','OA18
             'OA21','OA22','OA23','OA25','OA26','YA01','YA02','YA03','YA04','YA05','YA06','YA07',...
             'YA08','YA09','YA10','YA11','YA12','YA13','YA16','YA17','YA18','YA19','YA20'};
 cons = {'Old\Flat', 'Old\Uneven', 'Young\Flat', 'Young\Uneven'};
-lcl_evts = {'IC', 'LR', 'MS', 'TS', 'PSw', 'ISw', 'MSw', 'TSw'};
+lcl_evts = {'IC', 'LR', 'MS', 'TS', 'PSw', 'ISw', 'MSw', 'TSw', 'velocity'};
 chns = {'RightKHStance_MARP','RightKHSwing_MARP', 'RightAKStance_MARP','RightAKSwing_MARP', ...
         'RightKHStance_DP', 'RightKHSwing_DP', 'RightAKStance_DP', 'RightAKSwing_DP'};   
 
