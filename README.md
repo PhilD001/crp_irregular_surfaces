@@ -1,13 +1,12 @@
 ## Continuous relative phase analysis for gait on irregular surfaces
-This repository contains code associated with the manuscript entitled:
-"Lower-limb coordination and variability during gait: The effects of age and walking surface." 
-by P Ippersiel, SM Robbins, PC Dixon
+This repository contains code associated with the following manuscript:
 
+P. Ippersiel, S.M. Robbins, P.C. Dixon. Lower-limb coordination and variability during gait: The effects of age and walking surface,
+Gait & Posture, 85, 2021, 251-257. https://doi.org/10.1016/j.gaitpost.2021.02.009.
 
 ### Requirements
 Code must be run in Matlab (The Mathworks, Inc. Natick, USA). 
 All tests performed in Matlab 2020a under Mac OS 10.15.5.
-
 
 ### Steps (How to run)
 1. Dowload or clone the repository to your local computer
